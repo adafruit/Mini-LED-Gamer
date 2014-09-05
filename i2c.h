@@ -88,8 +88,8 @@ void delay_ms(uint16_t x);
  *********************/
 
 void i2cInit(void){
-  // set SCL freq = F_CPU/(16+2*TWBR*4^TWPS))=16*10^6/(16+2*12)=400kHz
-  TWSR &= ~(_BV(TWPS0)|_BV(TWPS1));  // clear TWPS in TWSR register, setting prescaler(TWPS) = 1
+  // set SCL freq = F_CPU/(16+2*TWBR*4^TWPS))=16*10^6/(16+2*12*1)=400kHz
+  TWSR &= ~(_BV(TWPS0)|_BV(TWPS1));  // clear TWPS in TWSR register, setting prescaler(TWPS) = 0
   TWBR = 12;  // set bit rate register
   TWCR |= _BV(TWEN);  // Enable TWI	
 }
