@@ -49,17 +49,6 @@
 #define I2C_OK			0x00
 #define I2C_ERROR_NODEV		0x01
 
-// setting the SDA pin as output/input (device dependent)
-//ATmega32U4
-//#define WRITE_sda() DDRD = DDRD | 0b00000010 //SDA must be output when writing
-//#define READ_sda()  DDRD = DDRD & 0b11111101 //SDA must be input when reading
-
-//ATmega328
-#define WRITE_sda() DDRD = DDRD | 0b00010000 //SDA must be output when writing
-#define READ_sda()  DDRD = DDRD & 0b11101111 //SDA must be input when reading
-
-// functions
-
 //! Initialize I2C (TWI) interface
 void i2cInit(void);
 // Low-level I2C transaction commands 
@@ -79,23 +68,20 @@ void i2cReceiveByte(unsigned char ackFlag);
 unsigned char i2cGetReceivedByte(void);
 //! Get current I2c bus status from TWSR
 unsigned char i2cGetStatus(void);
-void delay_ms(uint16_t x);
-
-// high-level I2C transaction commands
+void delay_10us(uint16_t x);
 
 /*********************
  ****I2C Functions****
  *********************/
 
 void i2cInit(void){
-  // set SCL freq = F_CPU/(16+2*TWBR*4^TWPS))=16*10^6/(16+2*12*1)=400kHz
+  // set SCL freq = F_CPU/(16+2*TWBR*4^TWPS))=16*10^6/(16+2*12)=400kHz
   TWSR &= ~(_BV(TWPS0)|_BV(TWPS1));  // clear TWPS in TWSR register, setting prescaler(TWPS) = 0
-  TWBR = 12;  // set bit rate register
+  TWBR = 12;  // set bit rate register (12 -> 400kHz; 32 -> 200kHz)
   TWCR |= _BV(TWEN);  // Enable TWI	
 }
 
 void i2cSendStart(void){
-  WRITE_sda();
   // send start condition
   TWCR = _BV(TWINT)|_BV(TWSTA)|_BV(TWEN);
 }
@@ -106,28 +92,25 @@ void i2cSendStop(void){
 }
 
 void i2cWaitForComplete(void){
+  // wait for i2c interface to complete operation, use i for timeout
   uint8_t i = 0;
-  // wait for i2c interface to complete operation
   while ((!(TWCR & (1<<TWINT))) && (i < 90))
     i++;
 }
 
 void i2cSendByte(uint8_t data){
-  delay_ms(1);
-  //printf("sending 0x%x\n", data);
-  WRITE_sda();
+  delay_10us(1);
   TWDR = data;  // save data to the TWDR
-  TWCR = (1<<TWINT)|(1<<TWEN);  // begin send
+  TWCR = (1<<TWINT) | (1<<TWEN);  // begin send
 }
 
 void i2cReceiveByte(uint8_t ackFlag){
-  // begin receive over i2c
   if( ackFlag ){
-    // ackFlag = -1: ACK the recevied data
+    // ackFlag = 1: ACK the recevied data (would like to receive more data)
     TWCR = (TWCR&TWCR_CMD_MASK)|_BV(TWINT)|_BV(TWEA);
   }
   else{
-    // ackFlag = 0: NACK the recevied data
+    // ackFlag = 0: NACK the recevied data (want to stop receiving data)
     TWCR = (TWCR&TWCR_CMD_MASK)|_BV(TWINT);
   }
 }
@@ -142,13 +125,10 @@ unsigned char i2cGetStatus(void){
   return(TWSR);
 }
 
-void delay_ms(uint16_t x){
-  uint8_t y, z;
-  for ( ; x > 0 ; x--){
-    for ( y = 0 ; y < 90 ; y++){
-      for ( z = 0 ; z < 6 ; z++){
+void delay_10us(uint16_t x){
+  for (x ; x > 0 ; x--){
+    for (uint8_t y = 0 ; y < 25; y++){
         asm volatile ("nop");
-      }
     }
   }
 }
@@ -160,7 +140,7 @@ void delay_ms(uint16_t x){
 void writeRegister(uint8_t address, uint8_t data){
   i2cSendStart();
   i2cWaitForComplete();
-  i2cSendByte((address<<1)); // writes terminate with 0
+  i2cSendByte((address<<1));
   i2cWaitForComplete();
   i2cSendByte(data);
   i2cWaitForComplete();
@@ -170,9 +150,9 @@ void writeRegister(uint8_t address, uint8_t data){
 void writeRegisters(uint8_t address, uint8_t regsiter, uint8_t i, uint16_t *data){
   i2cSendStart();
   i2cWaitForComplete();
-  i2cSendByte((address<<1)); // writes terminate with 0
+  i2cSendByte((address<<1));
   i2cWaitForComplete();
-  i2cSendByte(regsiter);	// Write register address
+  i2cSendByte(regsiter);
   i2cWaitForComplete();
   
   for (uint8_t j=0;j<i;j++) {
@@ -193,16 +173,13 @@ uint8_t readRegister(uint8_t address, uint8_t regsiter){
   i2cWaitForComplete();
 
   i2cSendStart();
+  i2cWaitForComplete();
   i2cSendByte((address<<1)|0x01);
   i2cWaitForComplete();
-  i2cReceiveByte(-1);
+  i2cReceiveByte(0);
   i2cWaitForComplete();
-  uint8_t data = i2cGetReceivedByte();	// Get MSB result
-  i2cWaitForComplete();
+  uint8_t data = i2cGetReceivedByte();
   i2cSendStop();
-
-  TWCR &= ~_BV(TWEN);  // Disable TWI
-  TWCR |= _BV(TWEN);  // Enable TWI
 
   return data;
 }
