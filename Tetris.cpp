@@ -50,7 +50,7 @@ void Tetris::gameOver() {
   Serial.println("Game Over");
 }
 
-bool Tetris::generatePiece() {
+void Tetris::generatePiece() {
   uint8_t i = random(7);
   currentPiece = (uint8_t*)piecesGenerated[i];
   currentPieceX = 0;
@@ -164,7 +164,8 @@ bool Tetris::clearLines(){
     else temp[i]=val;
   } 
   // if no line is cleared, return now, give the player some more time before convertActiveToDead()
-  if (linesCleared==0) return false;
+  if (linesCleared==0)  return false;
+  
   // if lines are cleared, convertActiveToDead(), add cleared lines to the total, then flash
   convertActiveToDead();
   totalLinesCleared+=linesCleared;
@@ -179,4 +180,5 @@ bool Tetris::clearLines(){
       n--;
     }
   }
+  return true;
 }

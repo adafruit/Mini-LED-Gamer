@@ -2,7 +2,7 @@
 
 void Snake::run() {
   if (gameRunning) {
-    if (millis()-lastSnakeMoveTime>350-snakeLength*10) {
+    if ((millis()-lastSnakeMoveTime)>((80-snakeLength)*(80-snakeLength)/20)) {
       if (!moveSnake()) gameOver();
       else lastSnakeMoveTime=millis();
     }
@@ -83,16 +83,7 @@ void Snake::changeDirection(int8_t dx, int8_t dy) {
 }
 
 uint8_t* Snake::getActiveBoard(){
-  uint8_t activeSnakeBoard[16]={0};
-  // the first for loop won't give a value to activeSnakeBoard[15], why?
   for (int8_t y=0; y<16; y++) {
-    uint8_t temp=0;
-    for (int8_t x=0; x<8; x++) {
-      if (snakeBoard[y][x]) temp |= _BV(7-x);
-    }
-    activeSnakeBoard[y]=temp;
-  }
-  for (int8_t y=15; y>=0; y--) {
     uint8_t temp=0;
     for (int8_t x=0; x<8; x++) {
       if (snakeBoard[y][x]) temp |= _BV(7-x);

@@ -1,5 +1,5 @@
-//      This library provides the high-level functions needed to use the I2C
-//	serial interface supported by the hardware of several AVR processors.
+// This library provides the high-level functions needed to use the I2C
+// serial interface supported by the hardware of several AVR processors.
 #ifndef i2c_h
 #define i2c_h
 
@@ -126,7 +126,7 @@ unsigned char i2cGetStatus(void){
 }
 
 void delay_10us(uint16_t x){
-  for (x ; x > 0 ; x--){
+  for (; x > 0 ; x--){
     for (uint8_t y = 0 ; y < 25; y++){
         asm volatile ("nop");
     }

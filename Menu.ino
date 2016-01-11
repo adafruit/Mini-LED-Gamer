@@ -70,6 +70,7 @@ uint8_t* getMenu(){
     case 3:
       return (uint8_t*)paintBoot;
   }
+  return 0;
 }
 
 void changeOption(int8_t i){
