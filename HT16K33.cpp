@@ -3,7 +3,6 @@
 
 HT16K33::HT16K33(uint8_t _addr) {
   i2c_addr=_addr;
-  uint8_t buffer[16] = {};
 }
 
 void HT16K33::init() {
@@ -37,35 +36,27 @@ void HT16K33::decreaseBrightness() {
   }
 }
 
-uint16_t* HT16K33::transposeMatrix(uint8_t* matrix) {
-  uint16_t transposedMatrix[8];
-  for (uint8_t i=0;i<8;i++) {      // each outer loop generates one uint16_t for the horizontalDisplayBuffer
-    uint16_t val=0;
-    for (uint8_t j=0;j<16;j++)  {  // each inner loop looks at one uint8_t in the verticalDisplayBuffer
-      uint8_t bitVal=(matrix[j]>>i)&1;
-      uint8_t shiftVal=j;
-      val+=(bitVal<<shiftVal);
-    }
-    transposedMatrix[i]=val;
-  }
-  return transposedMatrix;
-}
-
 void HT16K33::storeToBuffer(uint8_t* matrix) {
   for (uint8_t i=0;i<16;i++) buffer[i]=matrix[i];
 }
 
-void HT16K33::writeToDisplay(uint8_t* matrix) {
-  writeRegisters(i2c_addr, DISP_REGISTER, 8, transposeMatrix(matrix));
-}
-
 void HT16K33::refreshDisplay() {
-  writeToDisplay(buffer);
+  uint16_t transposedBuffer[8];
+  for (uint8_t i=0;i<8;i++) {
+    uint16_t val=0;
+    for (uint8_t j=0;j<16;j++)  {
+      uint8_t bitVal=(buffer[j]>>i)&1;
+      uint8_t shiftVal=j;
+      val+=(bitVal<<shiftVal);
+    }
+    transposedBuffer[i]=val;
+  }
+  writeRegisters(i2c_addr, DISP_REGISTER, 8, transposedBuffer);
 }
 
 void HT16K33::clearDisplay() {
-  uint8_t zero[16] = {0};
-  writeToDisplay(zero);
+  uint16_t zero[8] = {0};
+  writeRegisters(i2c_addr, DISP_REGISTER, 8, zero);
 }
 
 void HT16K33::readButtons() {

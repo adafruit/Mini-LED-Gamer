@@ -35,11 +35,14 @@ ISR(TIMER1_OVF_vect){
   processButtons();
   switch(mode) {
     case 0:
-      ht.storeToBuffer(getMenu());break;
+      ht.storeToBuffer(getMenu());
+      break;
     case 1:
-      ht.storeToBuffer(tetris.getActiveBoard()); break;
+      ht.storeToBuffer(tetris.getActiveBoard());
+      break;
     case 2:
-      ht.storeToBuffer(snake.getActiveBoard());  break;
+      ht.storeToBuffer(snake.getActiveBoard());
+      break;
     case 3: 
       ht.storeToBuffer(paint.getActiveCanvas());
   }
@@ -113,7 +116,7 @@ void processButtons() {
 void setup(){    
   // Set randomSeed; the first few random() are not used because they never change
   randomSeed(analogRead(A0));
-  for (uint8_t i=0;i<4;i++) uint8_t x=random();
+  for (uint8_t i=0;i<4;i++) random();
   
   // Initiate objects
   Serial.begin(115200);

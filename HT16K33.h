@@ -28,8 +28,7 @@ class HT16K33 {
     void increaseBrightness();
     void decreaseBrightness();
     
-    void storeToBuffer(uint8_t* matrix);   
-    void writeToDisplay(uint8_t* matrix);
+    void storeToBuffer(uint8_t* matrix);
     void refreshDisplay();
     void clearDisplay();
     void readButtons();  // only reads the first byte of the key scan register becasue only the first 7 keys are used on this device

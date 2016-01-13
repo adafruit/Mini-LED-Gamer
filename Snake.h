@@ -4,12 +4,13 @@ class Snake {
   private:
     uint8_t foodX; //(0-7)
     uint8_t foodY; //(0-15)
-    uint8_t snakeLength;
+    uint16_t snakeLength;
     int8_t snakeHeadX;
     int8_t snakeHeadY;
     int8_t snakeHeadDX;
     int8_t snakeHeadDY;
     uint8_t snakeBoard[16][8];
+    uint8_t activeSnakeBoard[16];
     unsigned long lastSnakeMoveTime;
     bool allowToChangeDirection;
     

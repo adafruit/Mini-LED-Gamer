@@ -25,7 +25,7 @@ class Tetris{
     unsigned long lastMoveTime;
     unsigned long lastLandedTime;
     
-    bool generatePiece();  // randomly generate a piece from piecesGenerated
+    void generatePiece();  // randomly generate a piece from piecesGenerated
     bool checkIfLanded();
     bool clearLines();  // returns false if no line is cleared
     void flashClearedLines(uint8_t* temp);
